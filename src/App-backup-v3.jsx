@@ -558,6 +558,7 @@ function ClientCard({ client, onClick, currentYear }) {
   const [hov, setHov] = useState(false);
   const age = contractAge(client.startDate);
   const isVariable = normalizeBillingModel(client.billingModel) === "variable";
+  const receivedYear = sumPaymentsForYear(client, currentYear);
   const monthlyEstimate = estimatedMonthlyValue(client, currentYear);
 
   return (
@@ -584,7 +585,9 @@ function ClientCard({ client, onClick, currentYear }) {
         <span style={{ color: C.textTertiary }}>Cidade</span><span style={{ color: C.textSecondary, textAlign: "right" }}>{client.city}{client.state ? `, ${client.state}` : ""}</span>
         <span style={{ color: C.textTertiary }}>Cobrança</span><span style={{ color: C.textSecondary, textAlign: "right" }}>{getBillingLabel(client.billingModel)}</span>
         <span style={{ color: C.textTertiary }}>{isVariable ? "Média/mês" : "Valor/mês"}</span><span style={{ color: C.accent, fontWeight: 700, textAlign: "right" }}>{brl(monthlyEstimate)}</span>
+        {isVariable && <><span style={{ color: C.textTertiary }}>Recebido ano</span><span style={{ color: "#c084fc", fontWeight: 700, textAlign: "right" }}>{brl(receivedYear)}</span></>}
         {age && <><span style={{ color: C.textTertiary }}>Tempo</span><span style={{ color: "#4a9eff", fontWeight: 500, textAlign: "right" }}>{age}</span></>}
+        {client.pdfName && <><span style={{ color: C.textTertiary }}>Contrato PDF</span><span style={{ color: C.textSecondary, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{client.pdfName}</span></>}
       </div>
     </div>
   );
