@@ -554,60 +554,26 @@ function Drawer({ client, onClose, onSave, saving, defaultBillingModel = "fixed"
   );
 }
 
-function ClientCard({ client, onClick, onDelete, currentYear, deletingId }) {
+function ClientCard({ client, onClick, currentYear }) {
   const [hov, setHov] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const age = contractAge(client.startDate);
   const isVariable = normalizeBillingModel(client.billingModel) === "variable";
   const monthlyEstimate = estimatedMonthlyValue(client, currentYear);
-  const isDeleting = deletingId === client.id;
 
   return (
     <div
       onClick={() => onClick(client)}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
-      style={{ background: hov ? C.cardHover : C.card, border: `1px solid ${hov ? C.accent + "44" : C.border}`, borderRadius: 12, padding: "16px 18px", cursor: isDeleting ? "wait" : "pointer", transition: "all 200ms ease", display: "flex", flexDirection: "column", gap: 11, position: "relative", opacity: isDeleting ? 0.65 : 1 }}
+      style={{ background: hov ? C.cardHover : C.card, border: `1px solid ${hov ? C.accent + "44" : C.border}`, borderRadius: 12, padding: "16px 18px", cursor: "pointer", transition: "all 200ms ease", display: "flex", flexDirection: "column", gap: 11 }}
     >
-      <button
-        type="button"
-        aria-label="Opções do cliente"
-        onClick={(e) => {
-          e.stopPropagation();
-          if (!isDeleting) setMenuOpen((open) => !open);
-        }}
-        style={{ position: "absolute", top: 10, right: 10, width: 28, height: 28, borderRadius: 8, border: `1px solid ${menuOpen ? C.accent + "66" : "transparent"}`, background: menuOpen ? "#111111" : "transparent", color: C.textTertiary, cursor: isDeleting ? "wait" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, zIndex: 3 }}
-      >
-        <i className="ti ti-dots-vertical" />
-      </button>
-
-      {menuOpen && (
-        <div
-          onClick={(e) => e.stopPropagation()}
-          style={{ position: "absolute", top: 42, right: 10, minWidth: 154, background: "#111111", border: `1px solid ${C.border}`, borderRadius: 10, padding: 6, boxShadow: "0 14px 40px rgba(0,0,0,0.35)", zIndex: 5 }}
-        >
-          <button
-            type="button"
-            disabled={isDeleting}
-            onClick={(e) => {
-              e.stopPropagation();
-              setMenuOpen(false);
-              onDelete(client);
-            }}
-            style={{ width: "100%", background: "transparent", border: "none", borderRadius: 8, padding: "9px 10px", color: C.badgeEncerrado.text, cursor: isDeleting ? "wait" : "pointer", display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 700, fontFamily: "Inter,sans-serif", textAlign: "left" }}
-          >
-            <i className="ti ti-trash" style={{ fontSize: 15 }} />
-            {isDeleting ? "Excluindo..." : "Excluir cliente"}
-          </button>
-        </div>
-      )}
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
         <Avatar name={client.name} logo={client.logo} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: C.textPrimary, fontWeight: 700, fontSize: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{client.name}</div>
           {client.instagram && <div style={{ color: "#666", fontSize: 11, marginTop: 2 }}>{client.instagram}</div>}
         </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, marginRight: 22 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
           <Badge status={client.status} />
           <BillingBadge billingModel={client.billingModel} />
         </div>
@@ -732,7 +698,7 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [activeNav, setActiveNav] = useState("dashboard");
-  const [filter, setFilter] = useState("Ativo");
+  const [filter, setFilter] = useState("Todos");
   const [search, setSearch] = useState("");
   const [clients, setClients] = useState([]);
   const [drawer, setDrawer] = useState(null);
@@ -740,7 +706,6 @@ export default function App() {
   const [advFilters, setAdvFilters] = useState({ type: "", location: "" });
   const [sidebarLogo, setSidebarLogo] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState(null);
   const [loadingClients, setLoadingClients] = useState(false);
   const logoUploadRef = useRef();
 
@@ -940,45 +905,6 @@ export default function App() {
     }
   };
 
-  const deleteClient = async (client) => {
-    if (!user) {
-      alert("Você precisa estar logado para excluir.");
-      return;
-    }
-
-    const confirmed = window.confirm(`Tem certeza que deseja excluir ${client.name}? Essa ação não pode ser desfeita.`);
-    if (!confirmed) return;
-
-    setDeletingId(client.id);
-
-    try {
-      const filesToRemove = [];
-      if (client.logoPath) filesToRemove.push({ bucket: "client-logos", path: client.logoPath });
-      if (client.pdfPath) filesToRemove.push({ bucket: "contracts", path: client.pdfPath });
-
-      await Promise.all(filesToRemove.map(async ({ bucket, path }) => {
-        const { error } = await supabase.storage.from(bucket).remove([path]);
-        if (error) console.warn(`Não foi possível remover o arquivo do bucket ${bucket}:`, error);
-      }));
-
-      const { error } = await supabase
-        .from("clients")
-        .delete()
-        .eq("id", client.id)
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-
-      setClients((current) => current.filter((item) => item.id !== client.id));
-      setDrawer((current) => current?.id === client.id ? null : current);
-    } catch (error) {
-      console.error("Erro ao excluir cliente:", error);
-      alert(`Erro ao excluir cliente: ${error.message}`);
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
   const handleSidebarLogo = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -1083,7 +1009,7 @@ export default function App() {
                 <div style={{ color: C.textTertiary, fontSize: 14, padding: "40px 0", textAlign: "center" }}>Carregando clientes...</div>
               ) : (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(290px,1fr))", gap: 12 }}>
-                  {filtered.map((c) => <ClientCard key={c.id} client={c} currentYear={currentYear} deletingId={deletingId} onDelete={deleteClient} onClick={(cl) => setDrawer(cl)} />)}
+                  {filtered.map((c) => <ClientCard key={c.id} client={c} currentYear={currentYear} onClick={(cl) => setDrawer(cl)} />)}
                   {filtered.length === 0 && (
                     <div style={{ color: C.textTertiary, fontSize: 14, padding: "40px 0", gridColumn: "1/-1", textAlign: "center" }}>
                       <i className="ti ti-users-off" style={{ fontSize: 30, display: "block", marginBottom: 10 }} />
