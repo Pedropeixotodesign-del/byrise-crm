@@ -21,28 +21,6 @@ const C = {
   badgeVariavel: { bg: "#1f1635", text: "#c084fc" },
 };
 
-function GlobalStyles() {
-  return (
-    <style>{`
-      html, body, #root {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        min-height: 100%;
-        background: ${C.bg};
-      }
-
-      body {
-        overflow: hidden;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-    `}</style>
-  );
-}
-
 const NAV = [
   { icon: "ti-layout-dashboard", label: "Dashboard geral", key: "dashboard" },
   { icon: "ti-users", label: "Clientes fixos", key: "fixed" },
@@ -676,8 +654,7 @@ function AuthScreen() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", width: "100vw", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter,sans-serif", color: C.textPrimary, padding: 20 }}>
-      <GlobalStyles />
+    <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter,sans-serif", color: C.textPrimary, padding: 20 }}>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
       <form onSubmit={submit} style={{ width: "100%", maxWidth: 390, background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 24 }}>
@@ -1023,19 +1000,13 @@ export default function App() {
   };
 
   if (authLoading) {
-    return (
-      <div style={{ height: "100vh", background: C.bg, color: C.textSecondary, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter,sans-serif" }}>
-        <GlobalStyles />
-        Carregando...
-      </div>
-    );
+    return <div style={{ height: "100vh", background: C.bg, color: C.textSecondary, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter,sans-serif" }}>Carregando...</div>;
   }
 
   if (!session) return <AuthScreen />;
 
   return (
-    <div style={{ display: "flex", width: "100vw", height: "100vh", background: C.bg, fontFamily: "'Inter',sans-serif", color: C.textPrimary, overflow: "hidden" }}>
-      <GlobalStyles />
+    <div style={{ display: "flex", height: "100vh", background: C.bg, fontFamily: "'Inter',sans-serif", color: C.textPrimary, overflow: "hidden" }}>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
 
