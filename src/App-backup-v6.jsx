@@ -390,7 +390,6 @@ function Drawer({ client, onClose, onSave, saving, defaultBillingModel = "fixed"
   const empty = {
     name: "",
     instagram: "",
-    cnpj: "",
     company: "",
     responsible: "",
     cargo: "",
@@ -486,7 +485,6 @@ function Drawer({ client, onClose, onSave, saving, defaultBillingModel = "fixed"
 
         <DrawerField label="Nome do cliente"><input style={iStyle} value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Ex: Dra. Ana Beatriz" /></DrawerField>
         <DrawerField label="Instagram"><input style={iStyle} value={form.instagram || ""} onChange={(e) => set("instagram", e.target.value)} placeholder="@cliente" /></DrawerField>
-        <DrawerField label="CNPJ"><input style={iStyle} value={form.cnpj || ""} onChange={(e) => set("cnpj", e.target.value)} placeholder="00.000.000/0000-00" /></DrawerField>
         <DrawerField label="Responsável"><input style={iStyle} value={form.responsible || ""} onChange={(e) => set("responsible", e.target.value)} /></DrawerField>
         <DrawerField label="Cargo"><input style={iStyle} value={form.cargo || ""} onChange={(e) => set("cargo", e.target.value)} /></DrawerField>
 
@@ -799,7 +797,6 @@ export default function App() {
         id: c.id,
         name: c.name || "",
         instagram: c.instagram || "",
-        cnpj: c.cnpj || "",
         company: c.company || "",
         responsible: c.responsible || "",
         cargo: c.cargo || "",
@@ -837,7 +834,7 @@ export default function App() {
   const filtered = viewClients.filter((c) => {
     const mStatus = filter === "Todos" || c.status === filter;
     const term = search.toLowerCase();
-    const mSearch = !term || c.name.toLowerCase().includes(term) || (c.company || "").toLowerCase().includes(term) || (c.instagram || "").toLowerCase().includes(term) || (c.cnpj || "").toLowerCase().includes(term);
+    const mSearch = !term || c.name.toLowerCase().includes(term) || (c.company || "").toLowerCase().includes(term) || (c.instagram || "").toLowerCase().includes(term);
     const mType = !advFilters.type || c.type === advFilters.type;
     const mLoc = !advFilters.location || c.city === advFilters.location;
     return mStatus && mSearch && mType && mLoc;
@@ -905,7 +902,6 @@ export default function App() {
         user_id: user.id,
         name: form.name.trim(),
         instagram: form.instagram || null,
-        cnpj: form.cnpj || null,
         company: form.company || null,
         responsible: form.responsible || null,
         cargo: form.cargo || null,
